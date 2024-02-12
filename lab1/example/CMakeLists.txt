@@ -15,3 +15,4 @@ target_include_directories(
 )
 
 target_link_libraries(lab1_example lab1)
+target_link_libraries(lab1_example gtest_main gmock_main)

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
-#define rus_init SetConsoleOutputCP(CP_UTF8);
+#include <functional>
 
-using namespace std;
+#define rus_init SetConsoleOutputCP(CP_UTF8);
