@@ -4,4 +4,6 @@ project(lab1)
 
 add_subdirectory(example)
 
-add_subdirectory(test)
+add_subdirectory(src)
+
+add_subdirectory(labs_example)
