@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../plot/plot.py ${CMAKE_CURRENT_BINARY_DIR}/plot.py)
+
 file(GLOB SRCS *.cpp)
 
 add_library(
