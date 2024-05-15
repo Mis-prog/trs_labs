@@ -1,138 +1,121 @@
-#define _USE_MATH_DEFINES
-
 #include <iostream>
-#include <stdio.h>
+#include <vector>
+#include <chrono>
 #include <fstream>
-#include <math.h>
 #include <iomanip>
+#include <math.h>
+
 
 using namespace std;
 
-#define eps 0.01
 
-double fi(double x, double t) {
-    return sinh(x);
+double F(double u) {
+    return u * u * u;
+    //return 1;
 }
 
-double F(double x, double t) {
-    return 0.;
+double func(double x, double t) {
+    return ((1. - x) * (1. - x) - x * sin(t) - 2. * t);
 }
 
-double psiOne(double x, double t) {
-    return exp(t);
+double k1(double u) {
+    return u * u + 1;
+    //return 1;
 }
 
-double psiTwo(double x, double t) {
-    return exp(t + 1);
-}
-
-double K(double x, double t) {
-    return 1.;
-}
-
-double *progonka(int N, double *A, double *B, double *C, double *f, double *y) {
-    double *v, *u;
-    v = new double[N + 1];
-    u = new double[N + 1];
-
-    v[0] = 0;
-    u[0] = 0;
-
-    for (int i = 1; i < N + 1; i++) {
-        v[i] = -A[i - 1] / (B[i - 1] + C[i - 1] * v[i - 1]);
-        u[i] = (f[i - 1] - C[i - 1] * u[i - 1]) / (B[i - 1] + C[i - 1] * u[i - 1]);
+vector<double> TripleDiag(vector<double> A, vector<double> B, vector<double> C, vector<double> D) {
+    vector<double> P(A.size());
+    vector<double> Q(A.size());
+    vector<double> X(A.size());
+    int N = A.size();
+    P[0] = C[0] / B[0];
+    Q[0] = D[0] / B[0];
+    for (int i = 1; i < N; ++i) {
+        if (i < N - 1)
+            P[i] = C[i] / (B[i] - A[i] * P[i - 1]);
+        Q[i] = (D[i] - A[i] * Q[i - 1]) / (B[i] - A[i] * P[i - 1]);
     }
 
-    y[N] = u[N];
-    for (int i = N - 1; i >= 0; i--) {
-        y[i] = v[i + 1] * y[i + 1] + u[i + 1];
+    // backward
+    X[N - 1] = Q[N - 1];
+    for (int i = N - 2; i >= 0; --i) {
+        X[i] = Q[i] - P[i] * X[i + 1];
     }
-    return y;
+
+    return X;
 }
 
-void CS(int N, double h, double tau) {
-    cout << "\n > Conservative Scheme" << endl;
-    double *A = new double[N + 1];
-    double *B = new double[N + 1];
-    double *C = new double[N + 1];
-    double *f = new double[N + 1];
-    double *x = new double[N + 1];
-    double *uPrev = new double[N + 1];
-    double *uNext = new double[N + 1];
-    double *t = new double[N + 1];
-    double coef = 1.;
-    double ke, kw;
+double u1_func(double x, double t) {
+    return exp(t) * sinh(x);
+}
+void z3() {
+    vector<double> nX{10, 450}; // по x
+    vector<double> nT{10, 450};// по t
+    for (int k = 0; k < nX.size(); k++) {
+        ofstream result_file("../../../trs_labs_/output/lab_2/z3_u" + to_string(k) + ".txt");
+        auto begin = std::chrono::steady_clock::now();
+        double ht = 1. / (nT[k] - 1);
+        double hx = 1. / (nX[k] - 1);
 
-    for (int i = 0; i < N + 1; i++) {
-        x[i] = i * h;
-        t[i] = i * tau;
-        uPrev[i] = sinh(x[i]);
-        uNext[i] = 0;
-    }
-
-    double pogr = 0;
-
-    float timeStart = clock() / (float) CLOCKS_PER_SEC;
-
-    for (int tt = 0; tt < N + 1; tt++) {
-        A[0] = 0.;
-        B[0] = -1.;
-        C[0] = 1.;
-
-        A[N] = 0.;
-        B[N] = 1.;
-        C[N] = 0.;
-
-        f[0] = 1. * h;
-        f[N] = 1 - t[tt + 1];
-
-        for (int j = 1; j < N; j++) {
-            kw = (uPrev[j - 1] + uPrev[j]) / 2.;
-            ke = (uPrev[j + 1] + uPrev[j]) / 2.;
-
-            A[j] = (-coef / (2 * h * h)) * kw;
-            B[j] = (1. / tau + coef * ke / (h * h) + coef * kw / (h * h));
-            C[j] = (-coef / (2 * h * h)) * ke;
-
-            f[j] = uPrev[j] * (1. / tau - (1. - coef) * (ke) / (h * h) - (1. - coef) * (kw) / (h * h)) +
-                   uPrev[j + 1] * (1. - coef) * (ke) / (h * h) - uPrev[j - 1] * (1. - coef) * (kw) / (h * h) +
-                   uPrev[j] * uPrev[j] * F(x[j], t[tt + 1]);
-            //cout << A[j] << ", " << B[j] << ", "  << C[j] << ", "  << f[j] << endl;
+        vector<vector<double>> u(nT[k], vector<double>(nX[k]));
+        for (int i = 0; i < nX[k]; i++) {
+            u[0][i] = sinh(i * hx); // началка
         }
 
-        progonka(N + 1, A, B, C, f, uNext);
+        for (int j = 1; j < nT[k]; j++) {
+            vector<double> A(nX[k]), B(nX[k]), C(nX[k]), D(nX[k]);
+            //граничные
+            A[0] = 0;
+            B[0] = hx - 1;
+            C[0] = 1.;
+            D[0] = hx * exp(j * ht);
+            A[nX[k] - 1] = -1.;
+            B[nX[k] - 1] = hx + 1;
+            C[nX[k] - 1] = 0;
+            D[nX[k] - 1] = hx * exp(j * ht + 1);
+            //
+            double g = hx * hx / ht;
+            for (int i = 1; i < nX[k] - 1; i++) {
+                double ke = k1((u[j - 1][i + 1] + u[j - 1][i]) / 2);
+                double kw = k1((u[j - 1][i] + u[j - 1][i - 1]) / 2);
+                A[i] = -kw / hx / hx;
+                B[i] = 1. / ht + (kw + ke) / hx / hx;
+                C[i] = -ke / hx / hx;
+                D[i] = u[j - 1][i] / ht;
 
-        for (int i = 0; i < N + 1; i++) {
-            uPrev[i] = uNext[i];
-            double analitik = exp(t[tt]) * sinh(x[i]);
-            double delta = abs(analitik - uNext[i]);
-            if (delta > pogr) {
-                pogr = delta;
+            }
+            u[j] = TripleDiag(A, B, C, D);
+        }
+
+        auto end = std::chrono::steady_clock::now();
+        auto elapsed_ms = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+
+        for (int i = 0; i < nX[k]; i++) {
+            for (int j = 0; j < nT[k]; j++) {
+                result_file << u[j][i] << " ";
+            }
+            result_file << endl;
+        }
+        double dif;
+        double max_dif;
+        for (int i = 0; i < nT[k]; i++) {
+            for (int j = 0; j < nX[k]; j++) {
+                max_dif = 0;
+                dif = abs(u1_func(j * hx, i * ht) - u[i][j]);
+                if (dif > max_dif) {
+                    max_dif = dif;
+                }
             }
         }
-    }
 
-    float timeStop = clock() / (float) CLOCKS_PER_SEC;
-    cout << "Time = " << timeStop - timeStart << endl;
-    cout << "Error = " << setprecision(10) << pogr << endl;
+        cout << "Step x: " << hx << setw(13 + nX.size()) << "Step T: " << ht
+             << setw(8 + nX.size()) << "Error: " << max_dif << setw(8 + nX.size()) << "Time, ms: "
+             << elapsed_ms.count() * 1e-3 << endl;
+    }
 }
 
-int main(int argc, char *argv[]) {
-    int N = 100;
-    double h, tau;
-    double a = 0., b = 1.;
-
-    if (argc == 2) {
-        N = atoi(argv[1]);
-    }
-
-    h = (double) ((b - a) / double(N));
-    tau = (h * h) / 2;
-    tau = 5e-09;
-
-    cout << "N = " << N << ", h = " << h << ", tau = " << tau << endl;
-
-    CS(N, h, tau);
+int main() {
+    z3();
 
     return 0;
 }

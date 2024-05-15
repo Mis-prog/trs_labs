@@ -1,99 +1,98 @@
-#define _USE_MATH_DEFINES
-
 #include <iostream>
-#include <stdio.h>
+#include <vector>
 #include <fstream>
-#include <math.h>
+#include <string>
 #include <iomanip>
+#include <time.h>
+#include <chrono>
+#include <math.h>
 
 using namespace std;
 
-double F(double x, double t) {
-    return 0;
+
+
+double u1_func(double x, double t) {
+    return exp(t) * sinh(x);
 }
 
-double EFDS(int N, double h, double tau) {
-    cout << "> EFDS started..." << endl;
-    double *X = new double[N + 1];
-    double *T = new double[N + 1];
-    double **u = new double *[N + 1];
+void z1() {
+    double ht, hx;
 
-    for (int i = 0; i < N + 1; i++) {
-        X[i] = i * h;
-        T[i] = i * tau;
-    }
+    double cur_t = 0;
 
-    for (int t = 0; t < N + 1; t++) {
-        u[t] = new double[N + 1];
-    }
+    ofstream error("../../../trs_labs_/output/lab_2/z1_error.txt");
+    error << "count" << " " << "error" << " " << "time" << endl;
+    vector<int> nX{10,100,130};
+    vector<int> nT(nX.size());
 
-    for (int i = 0; i < N + 1; i++) {
-        for (int j = 0; j < N + 1; j++) {
-            u[i][j] = 0.0;
+    for (int i = 0; i < nX.size(); i++) {
+        clock_t start = clock();
+        hx = 1. / (nX[i] - 1);
+        nT[i] = 2 * (nX[i]) * (nX[i]);
+        ht = 1. / (nT[i] - 1);
+        vector<vector<double>> M(nT[i], vector<double>(nX[i], 0)); // t , x ;
+        ofstream file_to_cout("../../../trs_labs_/output/lab_2/z1_" + to_string(i + 1) + ".txt");
+
+
+        for (int k = 0; k < nX[i]; k++) {
+            M[0][k] = sinh(k * hx);
         }
-    }
+        double gamma = ht / hx / hx;
+        for (int j = 1; j < nT[i]; j++) {
 
-    for (int j = 0; j < N + 1; j++) {
-        u[0][j] = sinh(X[j]);
-    }
+            for (int k = 0; k < nX[i]; k++) {
+                if (k == 0) {
+                    cur_t = j * ht;
+                    M[j][k + 1] = gamma * (M[j - 1][k] - 2 * M[j - 1][k + 1] + M[j - 1][k + 2]) + M[j - 1][k + 1];
+                    M[j][k] = (hx * exp(cur_t) - M[j][k + 1]) / (hx - 1);
+//                    cout << M[j][k] << endl;
+                    continue;
+                }
+                if (k == (nX[i] - 1)) {
+                    cur_t = j * ht;
+//                    M[j][k - 1] = gamma * (M[j - 1][k - 2] - 2 * M[j - 1][k - 1] + M[j - 1][k]) + M[j - 1][k - 1];
+                    M[j][k] = (hx * exp(cur_t + 1) + M[j][k - 1]) / (hx + 1);
+                    continue;
+                }
 
-    double k, FF;
-    k = 1;
-
-    for (int t = 0; t < N; t++) {
-        for (int x = 1; x < N; x++) {
-            FF = F(X[x], T[t]);
-            u[t + 1][x] =
-                    (tau * k / (h * h)) * (u[t][x - 1] + u[t][x + 1]) - tau * (2. / (h * h) - 1. / tau) * u[t][x] +
-                    tau * FF;
-        }
-        u[t + 1][0] = u[t + 1][1] - h;
-        u[t + 1][N] = 1 - T[t + 1];
-
-    }
-
-    double pogr = 0;
-    ofstream fout1("EFDS-" + to_string(N) + ".txt");
-    ofstream fout2("an-" + to_string(N) + ".txt");
-
-    for (int m = 0; m < N + 1; m++) {
-        for (int j = 0; j < N + 1; j++) {
-            double analitik;
-            analitik = exp(T[m]) * sinh(X[j]);
-            double delta = abs(analitik - u[m][j]);
-
-            if (delta > pogr) {
-                pogr = delta;
+                M[j][k] = gamma * (M[j - 1][k - 1] - 2 * M[j - 1][k] + M[j - 1][k + 1]) + M[j - 1][k];
             }
-            if (m == N - 1)
-                cout << "  x = " << setprecision(10) << X[j] << " numsol = " << u[m][j] << " analitik = " << analitik
-                     << endl;
         }
+
+        clock_t end = clock();
+        double time = (double) (end - start) / CLOCKS_PER_SEC;
+
+        for (int j = 0; j < nT[i]; j++) {
+            for (int k = 0; k < nX[i]; k++) {
+                file_to_cout << M[j][k] << " ";
+            }
+            file_to_cout << endl;
+        }
+
+        double dif;
+        double max_dif;
+        for (int j = 0; j < nT[i]; j++) {
+            for (int k = 1; k < nX[i]; k++) {
+                max_dif = -1000;
+                dif = abs(abs(u1_func(k * hx, j * ht)) - abs(M[j][k]));
+//                cout << dif << " ";
+                if (dif > max_dif) {
+                    max_dif = dif;
+                }
+            }
+//            cout << endl;
+        }
+
+        error << nX[i] << " " << max_dif << " " << time << endl;
+        cout << "Step x: " << hx << setw(13 + nX.size()) << "Step T: " << ht
+             << setw(8 + nX.size()) << "Error: " << max_dif << setw(8 + nX.size()) << "Time: " << time << endl;
     }
 
-    fout1.close();
-    fout2.close();
-
-    cout << "max_pogr = " << setprecision(10) << pogr << endl;
-    return 0;
+    error.close();
 }
 
+int main(){
+     z1();
 
-int main(int argc, char *argv[]) {
-    int N = 100;
-    double h, tau;
-    double a = 0., b = 1.;
-
-    if (argc == 2) {
-        N = atoi(argv[1]);
-    }
-
-    h = (double) ((b - a) / double(N));
-    tau = h * h / 2.;
-
-    cout << "N = " << N << "; h = " << h << "; tau = " << tau << endl;
-
-    EFDS(N, h, tau);
-
-    return 0;
+     return 0;
 }
