@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/workspaces/trs_labs/lab_2/task_3.cpp
+iostream
+-
+vector
+-
+chrono
+-
+fstream
+-
+iomanip
+-
+math.h
+-
+

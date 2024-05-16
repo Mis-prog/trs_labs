@@ -10,7 +10,7 @@
 using namespace std;
 using namespace Eigen;
 
-const string path = "../../../trs_labs_/output/lab_3/";
+const string path = "../../trs_labs_/output/lab_3/";
 
 double u_analitic(double x, double y) {
     return sin(pi * x) * sin(pi * x) * sin(pi * y);
@@ -73,6 +73,10 @@ double phi4(double x) { // y=ly
 double func(double x, double y) {
     return pi * pi * sin(pi * y) * (5 * cos(pi * x) * cos(pi * x) - 3);
 }
+
+// double func(double x, double y) {
+//     return pi * pi * sin(pi * y) * (-2*cos(pi*x)*cos(pi*x)+3*sin(pi*x)*sin(pi*x));
+// }
 
 double f_4(double x, double y) {
     return (-6.283185308) * exp(x) * sin(3.141592654 * x) * sin(3.141592654 * y) * cos(3.141592654 * x) -
@@ -418,8 +422,6 @@ void z1_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
             ftc << phi4(hx * i) << " "; //border y = n;
         }
     }
-
-
 }
 
 void z2_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
