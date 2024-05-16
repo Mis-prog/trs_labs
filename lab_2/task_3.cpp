@@ -53,6 +53,8 @@ void z3() {
     vector<double> nT{10, 450};// по t
     for (int k = 0; k < nX.size(); k++) {
         ofstream result_file("../../../trs_labs_/output/lab_2/z3_u" + to_string(k) + ".txt");
+        ofstream result_file_error("../../../trs_labs_/output/lab_2/z3_u_error" + to_string(k) + ".txt");
+
         auto begin = std::chrono::steady_clock::now();
         double ht = 1. / (nT[k] - 1);
         double hx = 1. / (nX[k] - 1);
@@ -102,10 +104,12 @@ void z3() {
             for (int j = 0; j < nX[k]; j++) {
                 max_dif = 0;
                 dif = abs(u1_func(j * hx, i * ht) - u[i][j]);
+                result_file_error << dif << " ";
                 if (dif > max_dif) {
                     max_dif = dif;
                 }
             }
+            result_file_error << endl;
         }
 
         cout << "Step x: " << hx << setw(13 + nX.size()) << "Step T: " << ht

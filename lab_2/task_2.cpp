@@ -46,6 +46,7 @@ void z2_p1() {
         ht = 1. / (nT[i] - 1);
         vector<vector<double>> M(nT[i], vector<double>(nX[i])); // t , x ;
         ofstream file_to_cout("../../../trs_labs_/output/lab_2/z2_p1" + to_string(i + 1) + ".txt");
+        ofstream file_to_cout_error_1("../../../trs_labs_/output/lab_2/z2_p1_error" + to_string(i + 1) + ".txt");
         vector<double> A(nX[i]), B(nX[i]), C(nX[i]), D(nX[i]);
 
         for (int k = 0; k < nX[i]; k++) {
@@ -90,11 +91,14 @@ void z2_p1() {
             {
                 max_dif = 0;
                 dif = abs(u1_func(k * hx, j * hx) - M[j][k]);
+
+                file_to_cout_error_1 << dif << " ";
                 if (dif > max_dif)
                 {
                     max_dif = dif;
                 }
             }
+            file_to_cout_error_1 << endl;
         }
 
         cout << "Step x: " << hx << setw(13 + nX.size()) << "Step T: " << ht
@@ -113,6 +117,8 @@ void z2_p2() {
         ht = 1. / (nT[i] - 1);
         vector<vector<double>> M(nT[i], vector<double>(nX[i])); // t , x ;
         ofstream file_to_cout("../../../trs_labs_/output/lab_2/z2_p2" + to_string(i + 1) + ".txt");
+        ofstream file_to_cout_error("../../../trs_labs_/output/lab_2/z2_p2_error" + to_string(i + 1) + ".txt");
+
         vector<double> A(nX[i]), B(nX[i]), C(nX[i]), D(nX[i]);
 
         for (int k = 0; k < nX[i]; k++) {
@@ -155,11 +161,14 @@ void z2_p2() {
             {
                 max_dif = 0;
                 dif = abs(u1_func(k * hx, j * hx) - M[j][k]);
+
+                file_to_cout_error << dif << " ";
                 if (dif > max_dif)
                 {
                     max_dif = dif;
                 }
             }
+            file_to_cout_error << endl;
         }
 
         cout << "Step x: " << hx << setw(13 + nX.size()) << "Step T: " << ht

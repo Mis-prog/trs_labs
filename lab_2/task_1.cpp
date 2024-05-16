@@ -32,7 +32,7 @@ void z1() {
         ht = 1. / (nT[i] - 1);
         vector<vector<double>> M(nT[i], vector<double>(nX[i], 0)); // t , x ;
         ofstream file_to_cout("../../../trs_labs_/output/lab_2/z1_" + to_string(i + 1) + ".txt");
-
+        ofstream file_to_cout_2("../../../trs_labs_/output/lab_2/z1_error" + to_string(i + 1) + ".txt");
 
         for (int k = 0; k < nX[i]; k++) {
             M[0][k] = sinh(k * hx);
@@ -75,11 +75,13 @@ void z1() {
             for (int k = 1; k < nX[i]; k++) {
                 max_dif = -1000;
                 dif = abs(abs(u1_func(k * hx, j * ht)) - abs(M[j][k]));
+                file_to_cout_2 << dif << " ";
 //                cout << dif << " ";
                 if (dif > max_dif) {
                     max_dif = dif;
                 }
             }
+            file_to_cout_2 << endl;
 //            cout << endl;
         }
 
