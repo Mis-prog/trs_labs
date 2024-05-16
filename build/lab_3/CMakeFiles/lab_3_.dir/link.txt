@@ -1,1 +1,0 @@
-/usr/bin/clang++  -O3 -DNDEBUG   CMakeFiles/lab_3_.dir/TRS3.cpp.o  -o lab_3_ 

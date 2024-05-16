@@ -1,1 +1,0 @@
-/usr/bin/clang++  -O3 -DNDEBUG   CMakeFiles/lab4_task12.dir/task_1_2.cpp.o  -o lab4_task12 

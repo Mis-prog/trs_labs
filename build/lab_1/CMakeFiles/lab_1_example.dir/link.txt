@@ -1,1 +1,0 @@
-/usr/bin/clang++  -O3 -DNDEBUG   CMakeFiles/lab_1_example.dir/trs_lab1.cpp.o CMakeFiles/lab_1_example.dir/task5.cpp.o CMakeFiles/lab_1_example.dir/task4.cpp.o  -o lab_1_example 
