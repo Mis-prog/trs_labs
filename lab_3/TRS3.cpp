@@ -10,7 +10,7 @@
 using namespace std;
 using namespace Eigen;
 
-const string path = "../../trs_labs_/output/lab_3/";
+const string path = "../../../trs_labs_/output/lab_3/";
 
 double u_analitic(double x, double y) {
     return sin(pi * x) * sin(pi * x) * sin(pi * y);
@@ -346,6 +346,7 @@ vector<double> vectorSubtraction(vector<double> &A, vector<double> &B) {
         result[i] = A[i] - B[i];
     }
 
+
     return result;
 }
 
@@ -391,16 +392,22 @@ void z1_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
         //cout << diff << endl;
     }
 
-    double diff_analitic = -1;
+    ofstream ftc_error(path + "task1_error_" + to_string(N) + ".txt");
+
+    double diff_analitic = -1, error = 0;
     for (int j = 0; j < (M - 1); j++) {
         for (int i = 0; i < (N - 1); i++) {
-            diff_analitic = max(abs(u_analitic((i + 1) * hx, (j + 1) * hy) - x_next[j * (N - 1) + i]),
-                                diff_analitic); //err estimation
+            error = abs(u_analitic((i + 1) * hx, (j + 1) * hy) - x_next[j * (N - 1) + i]);
+            ftc_error << error << " ";
+            diff_analitic = max(error, diff_analitic); //err estimation
         }
+        ftc_error << endl;
     }
+
+
     cout << setprecision(3) << " hx: " << hx << " hy: " << hy << "  Error: " << diff_analitic << endl;
     if (paramToCout == 1) {
-        ofstream ftc(path + "task1.txt");
+        ofstream ftc(path + "task1_" + to_string(N) + ".txt");
         for (int i = 0; i <= N; i++) {
             ftc << phi3(hx * i) << " ";//border y = 0;
         }
@@ -421,6 +428,8 @@ void z1_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
         for (int i = 0; i <= N; i++) {
             ftc << phi4(hx * i) << " "; //border y = n;
         }
+
+        ftc.close();
     }
 }
 
@@ -696,16 +705,20 @@ void z4_Eigen(int N, int M, int paramToCout = 0) {
 }
 
 int main() {
-    z1_Poisson_problem_eq(30, 30, 1);
+    vector<int> N = {4, 10, 20, 30, 40, 50, 60};
 
-    z2_Poisson_problem_eq(30, 30, 1);
+    for (auto value: N) {
+        z1_Poisson_problem_eq(value, value, 1);
+    }
+
+
+
 
 //    z3(el, el, 1);
 
 //    int Number_of_ex;
 //
 //    cin >> Number_of_ex;
-//    vector<int> N = {4, 10, 20, 30, 40, 50, 60};
 //    switch (Number_of_ex) {
 //        case 1:
 //            for (auto &el: N) {
