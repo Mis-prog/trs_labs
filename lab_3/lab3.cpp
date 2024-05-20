@@ -4,6 +4,7 @@
 #include <string>
 #include <iomanip>
 #include <Sparse>
+#include <time.h>
 
 #define pi 3.1415926535
 
@@ -346,7 +347,7 @@ vector<double> vectorSubtraction(vector<double> &A, vector<double> &B) {
     return result;
 }
 
-void z1_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
+double z1_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
     double hx = 1. / (N - 1), hy = 1. / (M - 1);
     vector<double> f((N - 1) * (M - 1));
     vector<double> x_prev((N - 1) * (M - 1), 0);
@@ -426,9 +427,10 @@ void z1_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
 
         ftc.close();
     }
+    return diff_analitic;
 }
 
-void z2_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
+double z2_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
     double hx = 1. / (N - 1), hy = 1. / (M - 1);
     vector<double> f((N - 1) * (M - 1));
     vector<double> x_prev((N - 1) * (M - 1), 0);
@@ -512,9 +514,10 @@ void z2_Poisson_problem_eq(int N, int M, int paramToCout = 0) {
         }
         ftc.close();
     }
+    return diff_analitic;
 }
 
-void z3(int N, int M, int ptc) {
+double z3(int N, int M, int ptc=0) {
     vector<double> f((N - 1) * (M - 1));
     double hx = 1. / (N - 1), hy = 1. / (M - 1);
     filling_F(f, N, M);
@@ -557,6 +560,7 @@ void z3(int N, int M, int ptc) {
         }
         ftc.close();
     }
+    return diff_analitic;
 }
 
 void z4_Poisson_problem_eq_notwork(int N, int M, int paramToCout = 0) {
@@ -631,7 +635,7 @@ void z4_Poisson_problem_eq_notwork(int N, int M, int paramToCout = 0) {
     double max_num = 0;
     for (int j = 0; j < (M - 1); j++) {
         for (int i = 0; i < (N - 1); i++) {
-            cur_diff=abs(u_analitic((i + 1) * hx, (j + 1) * hy) - x[j * (N - 1) + i]);
+            cur_diff = abs(u_analitic((i + 1) * hx, (j + 1) * hy) - x[j * (N - 1) + i]);
             diff_analitic = max(cur_diff,
                                 diff_analitic); // error estimation
             max_num = max(abs(x[j * (N - 1) + i]), max_num);
@@ -733,26 +737,41 @@ int main() {
 //    z2_Poisson_problem_eq(value, value, 1);
 //    z3(value, value, 1);
 
-    // for (auto value : N)
-    // {
-    //     z1_Poisson_problem_eq(value, value, 1);
-    // }
+    double error = 0;
 
-    // for (auto value : N)
-    // {
-    //     z2_Poisson_problem_eq(value, value, 1);
-    // }
+    ofstream data_time_z0(path + "z0_time.txt");
 
-    // for (auto value : N)
-    // {
-    //     z3(value, value, 1);
-    // }
+    for (auto value: N) {
+        clock_t start = clock();
+        error = z1_Poisson_problem_eq(value, value);
+        clock_t end = clock();
 
+        double seconds = (double) (end - start) / CLOCKS_PER_SEC;
+        data_time_z0 << value << " " << error << " " << seconds << endl;
+    }
+    data_time_z0.close();
 
-     for (auto value : N)
-     {
-         z4_Poisson_problem_eq_notwork(value, value);
-         z4_Eigen(value, value);
-     }
+//    ofstream data_time_z1(path + "z1_time.txt");
+//    for (auto value: N) {
+//        clock_t start = clock();
+//        error = z2_Poisson_problem_eq(value, value);
+//        clock_t end = clock();
+//
+//        double seconds = (double) (end - start) / CLOCKS_PER_SEC;
+//        data_time_z1 << value << " " << error << " " << seconds << endl;
+//    }
+//    data_time_z1.close();
+//
+//    ofstream data_time_z2(path + "z2_time.txt");
+//    for (auto value: N) {
+//        clock_t start = clock();
+//        error = z3(value, value);
+//        clock_t end = clock();
+//
+//        double seconds = (double) (end - start) / CLOCKS_PER_SEC;
+//        data_time_z2 << value << " " << error << " " << seconds << endl;
+//    }
+//    data_time_z2.close();
 
+    return 0;
 }

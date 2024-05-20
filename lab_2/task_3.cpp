@@ -52,8 +52,8 @@ void z3() {
     vector<double> nX{10, 450}; // по x
     vector<double> nT{10, 450};// по t
     for (int k = 0; k < nX.size(); k++) {
-        ofstream result_file("../../../trs_labs_/output/lab_2/z3_u" + to_string(k) + ".txt");
-        ofstream result_file_error("../../../trs_labs_/output/lab_2/z3_u_error" + to_string(k) + ".txt");
+        ofstream result_file("../../trs_labs_/output/lab_2/z3_u" + to_string(k) + ".txt");
+        ofstream result_file_error("../../trs_labs_/output/lab_2/z3_u_error" + to_string(k) + ".txt");
 
         auto begin = std::chrono::steady_clock::now();
         double ht = 1. / (nT[k] - 1);
